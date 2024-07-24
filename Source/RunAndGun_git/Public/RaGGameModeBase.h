@@ -13,4 +13,6 @@ UCLASS()
 class RUNANDGUN_GIT_API ARaGGameModeBase : public AGameModeBase
 {
     GENERATED_BODY()
+public:
+    ARaGGameModeBase();
 };
