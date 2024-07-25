@@ -43,12 +43,13 @@ void ARaGBaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
     PlayerInputComponent->BindAxis("MoveRight", this, &ARaGBaseCharacter::MoveRight);
     PlayerInputComponent->BindAxis("LookUp", this, &ARaGBaseCharacter::AddControllerPitchInput);
     PlayerInputComponent->BindAxis("TurnAround", this, &ARaGBaseCharacter::AddControllerYawInput);
+    PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ARaGBaseCharacter::Jump);
 }
 
 void ARaGBaseCharacter::MoveForward(float Amount) {
 
 	AddMovementInput(GetActorForwardVector(), Amount);
-
+    
 }
 
 void ARaGBaseCharacter::MoveRight(float Amount) {
