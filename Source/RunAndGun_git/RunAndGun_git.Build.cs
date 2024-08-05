@@ -12,7 +12,13 @@ public class RunAndGun_git : ModuleRules
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 
-		PublicIncludePaths.AddRange(new string[] {"RunAndGun_git/Public/Player", "RunAndGun_git/Public/Components", "RunAndGun_git/Public/Components/Dev" });
+		PublicIncludePaths.AddRange(new string[] {
+			"RunAndGun_git/Public/Player", 
+			"RunAndGun_git/Public/Components", 
+			"RunAndGun_git/Public/Dev",
+            "RunAndGun_git/Public/Weapon"
+
+        });
 		// Uncomment if you are using Slate UI
 		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
 		

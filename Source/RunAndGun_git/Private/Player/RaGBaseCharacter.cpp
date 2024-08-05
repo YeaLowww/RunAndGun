@@ -8,21 +8,23 @@
 #include "Components/RaGCharacterMovementComponent.h"
 #include "Components/RaGHealthComponent.h"
 #include "Components/TextRenderComponent.h"
+#include "Components/RaGWeaponComponent.h"
 #include "Engine/DamageEvents.h"
+#include "GameFramework/Controller.h"
 
 
-DEFINE_LOG_CATEGORY_STATIC(BaseCharacterLog, All, All);
+DEFINE_LOG_CATEGORY_STATIC(BaseCharacterLog, All, All)
 
-// Sets default values
+
 ARaGBaseCharacter::ARaGBaseCharacter(const FObjectInitializer& ObjInit)
-    : Super(ObjInit.SetDefaultSubobjectClass<URaGCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
+    :Super(ObjInit.SetDefaultSubobjectClass<URaGCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
     SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>("SpringArmComponent");
     SpringArmComponent->SetupAttachment(GetRootComponent());
     SpringArmComponent->bUsePawnControlRotation = true;
+    SpringArmComponent->SocketOffset = FVector(0.0f, 100.0f, 80.0f);
 
     CameraComponent = CreateDefaultSubobject<UCameraComponent>("CameraComponent");
     CameraComponent->SetupAttachment(SpringArmComponent);
@@ -31,33 +33,38 @@ ARaGBaseCharacter::ARaGBaseCharacter(const FObjectInitializer& ObjInit)
 
     HealthTextComponent = CreateDefaultSubobject<UTextRenderComponent>("HealthTextComponent");
     HealthTextComponent->SetupAttachment(GetRootComponent());
+    HealthTextComponent->SetOwnerNoSee(true);
+
+    WeaponComponent = CreateDefaultSubobject<URaGWeaponComponent>("WeaponComponent");
 }
 
-// Called when the game starts or when spawned
 void ARaGBaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
     check(HealthTextComponent);
     check(HealthComponent);
-   
+    check(GetCharacterMovement());
+
+    OnHealthChanged(HealthComponent->GetHealth());
+    HealthComponent->OnDeath.AddUObject(this, &ARaGBaseCharacter::OnDeath);
+    HealthComponent->OnHealthChanged.AddUObject(this, &ARaGBaseCharacter::OnHealthChanged);
+
+    LandedDelegate.AddDynamic(this, &ARaGBaseCharacter::OnGroundLanded);
+
 }
 
-// Called every frame
 void ARaGBaseCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-    const auto Health = HealthComponent->GetHealth();
-    HealthTextComponent->SetText(FText::FromString(FString::Printf(TEXT("%.0f"), Health)));
 
 }
 
 
-
-
-// Called to bind functionality to input
 void ARaGBaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+    check(PlayerInputComponent);
+    check(WeaponComponent);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &ARaGBaseCharacter::MoveForward);
     PlayerInputComponent->BindAxis("MoveRight", this, &ARaGBaseCharacter::MoveRight);
@@ -66,6 +73,7 @@ void ARaGBaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
     PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ARaGBaseCharacter::Jump);
     PlayerInputComponent->BindAction("Run", IE_Pressed, this, &ARaGBaseCharacter::OnStartRunning);
     PlayerInputComponent->BindAction("Run", IE_Released, this, &ARaGBaseCharacter::OnStopRunning);
+    PlayerInputComponent->BindAction("Fire", IE_Pressed, WeaponComponent, &URaGWeaponComponent::Fire);
 }
 
 
@@ -106,4 +114,37 @@ float ARaGBaseCharacter::GetMovementDirection() const
     const auto Degrees = FMath::RadiansToDegrees(AngleBetween);
     return CrossProduct.IsZero() ? Degrees : Degrees * FMath::Sign(CrossProduct.Z);
 }
+
+void ARaGBaseCharacter::OnDeath() {
+
+    UE_LOG(BaseCharacterLog, Display, TEXT("Character is DEAD %s"), *GetName());
+
+    PlayAnimMontage(DeathAnimMontage);
+
+    GetCharacterMovement()->DisableMovement();
+
+    SetLifeSpan(LifeSpanOnDeath);
+    if (Controller)
+    {
+        Controller->ChangeState(NAME_Spectating);
+    }
+}
+
+void ARaGBaseCharacter::OnHealthChanged(float Health) {
+    HealthTextComponent->SetText(FText::FromString(FString::Printf(TEXT("%.0f"), Health)));
+
+}
+
+void ARaGBaseCharacter::OnGroundLanded(const FHitResult& Hit) {
+
+    const auto FallVelocityZ = -GetVelocity().Z;
+    UE_LOG(BaseCharacterLog, Display, TEXT("Character on Landed %f"), FallVelocityZ);
+
+    if (FallVelocityZ < LandedDamageVelocity.X) return;
+
+    const auto FinalDamage = FMath::GetMappedRangeValueClamped(LandedDamageVelocity, LandedDamage, FallVelocityZ);
+    UE_LOG(BaseCharacterLog, Display, TEXT("FinalDamage %f"), FinalDamage);
+    TakeDamage(FinalDamage, FDamageEvent{}, nullptr, nullptr);
+}
+
 

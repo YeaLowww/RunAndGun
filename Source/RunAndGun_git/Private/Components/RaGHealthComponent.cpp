@@ -3,8 +3,9 @@
 
 #include "Components/RaGHealthComponent.h"
 #include "GameFramework/Actor.h"
-#include "Dev/RaGFireDamageType.h"
-#include "Dev/RaGIceDamageType.h"
+#include "Engine/World.h"
+#include "TimerManager.h"
+
 
 DEFINE_LOG_CATEGORY_STATIC(LogHealthComponent, All, All)
 
@@ -15,12 +16,12 @@ URaGHealthComponent::URaGHealthComponent()
 
 }
 
-
-// Called when the game starts
 void URaGHealthComponent::BeginPlay()
 {
 	Super::BeginPlay();
-    Health = MaxHealth;
+
+    SetHealth(MaxHealth);
+
 
     AActor* ComponentOwner = GetOwner();
     if (ComponentOwner)
@@ -32,19 +33,35 @@ void URaGHealthComponent::BeginPlay()
 void URaGHealthComponent::OnTakeAnyDamage(
     AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
-    Health -= Damage;
-    UE_LOG(LogHealthComponent, Display, TEXT("Damage: %f"), Damage);
+    if (Damage <= 0.0f || IsDead() || !GetWorld()) return;
+    SetHealth(Health - Damage);
 
-    if (DamageType)
+    GetWorld()->GetTimerManager().ClearTimer(HealTimerHandle);
+
+    if (IsDead())
     {
-        if (DamageType->IsA<URaGFireDamageType>())
-        {
-            UE_LOG(LogHealthComponent, Display, TEXT("Fire Damage!"));
-        }
-        else if (DamageType->IsA<URaGIceDamageType>())
-        {
-            UE_LOG(LogHealthComponent, Display, TEXT("Ice Damage!"));
-        }
+        OnDeath.Broadcast();
+    }
+    else if (AutoHeal)
+    {
+        GetWorld()->GetTimerManager().SetTimer(HealTimerHandle, this, &URaGHealthComponent::HealUpdate, HealUpdateTime, true, HealDelay);
         
     }
+
+}
+
+void URaGHealthComponent::HealUpdate() {
+
+    SetHealth(Health + HealModifier);
+
+    if (FMath::IsNearlyEqual(Health, MaxHealth) && GetWorld())
+    {
+        GetWorld()->GetTimerManager().ClearTimer(HealTimerHandle);
+    }
+}
+
+void URaGHealthComponent::SetHealth(float NewHealth) {
+
+    Health = FMath::Clamp(NewHealth, 0.0f, MaxHealth);
+    OnHealthChanged.Broadcast(Health);
 }
