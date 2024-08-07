@@ -31,4 +31,5 @@ private:
     ARaGBaseWeapon* CurrentWeapon = nullptr;
 
     void SpawnWeapon();
+
 };
