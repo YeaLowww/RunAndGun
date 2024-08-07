@@ -32,8 +32,15 @@ void URaGWeaponComponent::SpawnWeapon()
 
 
 }
-void URaGWeaponComponent::Fire() {
+void URaGWeaponComponent::StartFire()
+{
 
     if (!CurrentWeapon) return;
-    CurrentWeapon->Fire();
+    CurrentWeapon->StartFire();
+}
+void URaGWeaponComponent::StopFire()
+{
+
+    if (!CurrentWeapon) return;
+    CurrentWeapon->StopFire();
 }

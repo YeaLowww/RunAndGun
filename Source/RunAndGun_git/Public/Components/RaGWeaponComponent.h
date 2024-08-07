@@ -14,7 +14,8 @@ class RUNANDGUN_GIT_API URaGWeaponComponent : public UActorComponent
 public:	
 
 	URaGWeaponComponent();
-    void Fire();
+    void StartFire();
+    void StopFire();
 
 protected:
     UPROPERTY(EditDefaultsOnly, Category = "Weapon")
