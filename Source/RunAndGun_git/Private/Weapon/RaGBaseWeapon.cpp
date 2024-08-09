@@ -6,7 +6,7 @@
 #include "DrawDebugHelpers.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/Controller.h"
-#include "Engine\DamageEvents.h"
+
 
 DEFINE_LOG_CATEGORY_STATIC(LogBaseWeapon, All, All)
 
@@ -77,11 +77,3 @@ void ARaGBaseWeapon::MakeHit(FHitResult& HitResult, const FVector& TraceStart, c
     GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECollisionChannel::ECC_Visibility, CollisionParams);
 }
 
-void ARaGBaseWeapon::MakeDamage(const FHitResult& HitResult)
-{
-
-    const auto DamagedActor = HitResult.GetActor();
-    if (!DamagedActor) return;
-
-    DamagedActor->TakeDamage(DamageAmount, FDamageEvent(), GetPlayerController(), this);
-}

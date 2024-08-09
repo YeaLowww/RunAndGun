@@ -4,6 +4,7 @@
 #include "Weapon/RaGRifleWeapon.h"
 #include "Engine/World.h"
 #include "DrawDebugHelpers.h"
+#include "Engine\DamageEvents.h"
 
 void ARaGRifleWeapon::StartFire()
 {
@@ -51,4 +52,13 @@ bool ARaGRifleWeapon::GetTraceData(FVector& TraceStart, FVector& TraceEnd) const
     const FVector ShotDirection = FMath::VRandCone(ViewRotation.Vector(), HalfRad);
     TraceEnd = TraceStart + ShotDirection * TraceMaxDistance;
     return true;
+}
+
+void ARaGRifleWeapon::MakeDamage(const FHitResult& HitResult)
+{
+
+    const auto DamagedActor = HitResult.GetActor();
+    if (!DamagedActor) return;
+
+    DamagedActor->TakeDamage(DamageAmount, FDamageEvent(), GetPlayerController(), this);
 }
