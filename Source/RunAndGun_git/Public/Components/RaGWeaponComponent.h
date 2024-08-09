@@ -3,9 +3,11 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "RaGCoreTypes.h"
 #include "RaGWeaponComponent.generated.h"
 
 class ARaGBaseWeapon;
+
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class RUNANDGUN_GIT_API URaGWeaponComponent : public UActorComponent
 {
@@ -16,10 +18,11 @@ public:
     void StartFire();
     void StopFire();
     void NextWeapon();
+    void Reload();
 
 protected:
     UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-    TArray<TSubclassOf<ARaGBaseWeapon>> WeaponClasses;
+    TArray<FWeaponData> WeaponData;
 
     UPROPERTY(EditDefaultsOnly, Category = "Weapon")
     FName WeaponEquipSocketName = "WeaponSocket";
@@ -38,17 +41,29 @@ private:
 
     UPROPERTY()
     TArray<ARaGBaseWeapon*> Weapons;
+
+    UPROPERTY()
+    UAnimMontage* CurrentReloadAnimMontage = nullptr;
+
     int32 CurrentWeaponIndex = 0;
     bool EquipAnimInProgress = false;
+    bool ReloadAnimInProgress = false;
 
     void SpawnWeapons();
     void AttachWeaponToSocket(ARaGBaseWeapon* Weapon, USceneComponent* SceneComponent, const FName& SocketName);
     void EquipWeapon(int32 WeaponIndex);
-    
+
     void PlayAnimMontage(UAnimMontage* Animation);
     void InitAnimation();
-    void OnEquipFinished(USkeletalMeshComponent* MeshComponent);
+    void OnEquipFinished(USkeletalMeshComponent* MeshComp);
+    void OnReloadFinished(USkeletalMeshComponent* MeshComp);
 
     bool CanFire() const;
     bool CanEquip() const;
+    bool CanReload() const;
+
+    void OnEmptyClip();
+    void ChangeClip();
+
+    
 };

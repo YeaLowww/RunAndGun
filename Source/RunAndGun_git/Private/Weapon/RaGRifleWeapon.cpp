@@ -8,8 +8,8 @@
 
 void ARaGRifleWeapon::StartFire()
 {
-    MakeShot();
     GetWorldTimerManager().SetTimer(ShotTimerHandle, this, &ARaGRifleWeapon::MakeShot, TimeBetweenShots, true);
+    MakeShot();
 }
 void ARaGRifleWeapon::StopFire()
 {
@@ -19,7 +19,7 @@ void ARaGRifleWeapon::StopFire()
 void ARaGRifleWeapon::MakeShot()
 {
 
-    if (!GetWorld()) return;
+    if (!GetWorld() || IsAmmoEmpty()) return;
 
     FVector TraceStart, TraceEnd;
     if (!GetTraceData(TraceStart, TraceEnd)) return;
@@ -37,6 +37,8 @@ void ARaGRifleWeapon::MakeShot()
     {
         DrawDebugLine(GetWorld(), GetMuzzleWorldLocation(), TraceEnd, FColor::Red, false, 3.0f, 0, 3.0f);
     }
+
+    DercreaseAmmo();
 }
 
 bool ARaGRifleWeapon::GetTraceData(FVector& TraceStart, FVector& TraceEnd) const

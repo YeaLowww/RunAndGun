@@ -4,12 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "Animation/RaGAnimNotify.h"
-#include "RaGEquipFinishedAnimNotify.generated.h"
+#include "RaGReloadFinishedAnimNotify.generated.h"
 
+/**
+ * 
+ */
 UCLASS()
-class RUNANDGUN_GIT_API URaGEquipFinishedAnimNotify : public URaGAnimNotify
+class RUNANDGUN_GIT_API URaGReloadFinishedAnimNotify : public URaGAnimNotify
 {
-    GENERATED_BODY()
-
-
+	GENERATED_BODY()
+	
 };

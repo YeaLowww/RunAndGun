@@ -17,7 +17,7 @@ public class RunAndGun_git : ModuleRules
 			"RunAndGun_git/Public/Components", 
 			"RunAndGun_git/Public/Dev",
             "RunAndGun_git/Public/UI",
-            "RunAndGun_git/Public/Animations",
+            "RunAndGun_git/Public/Animation",
 
         });
 		// Uncomment if you are using Slate UI

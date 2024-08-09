@@ -4,8 +4,12 @@
 #include "Weapon/RaGBaseWeapon.h"
 #include "GameFramework/Character.h"
 #include "Animation/RaGEquipFinishedAnimNotify.h"
+#include "Animation/RaGReloadFinishedAnimNotify.h"
+#include "Animation/AnimUtils.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogWeaponComponent, All, All)
+
+constexpr static int32 WeaponsNum = 2;
 
 URaGWeaponComponent::URaGWeaponComponent()
 {
@@ -16,6 +20,7 @@ URaGWeaponComponent::URaGWeaponComponent()
 void URaGWeaponComponent::BeginPlay()
 {
     Super::BeginPlay();
+    checkf(WeaponData.Num() == WeaponsNum, TEXT("Character can hold only %i weapons"), WeaponsNum);
 
     CurrentWeaponIndex = 0;
     InitAnimation();
@@ -42,11 +47,12 @@ void URaGWeaponComponent::SpawnWeapons()
     ACharacter* Character = Cast<ACharacter>(GetOwner());
     if (!Character || !GetWorld()) return;
 
-    for (auto WeaponClass : WeaponClasses)
+    for (auto OneWeaponData : WeaponData)
     {
-        auto Weapon = GetWorld()->SpawnActor<ARaGBaseWeapon>(WeaponClass);
+        auto Weapon = GetWorld()->SpawnActor<ARaGBaseWeapon>(OneWeaponData.WeaponClass);
         if (!Weapon) continue;
 
+        Weapon->OnClipEmpty.AddUObject(this, &URaGWeaponComponent::OnEmptyClip);
         Weapon->SetOwner(Character);
         Weapons.Add(Weapon);
 
@@ -63,6 +69,8 @@ void URaGWeaponComponent::AttachWeaponToSocket(ARaGBaseWeapon* Weapon, USceneCom
 
 void URaGWeaponComponent::EquipWeapon(int32 WeaponIndex)
 {
+    if (WeaponIndex < 0 || WeaponIndex >= Weapons.Num()) return;
+
     ACharacter* Character = Cast<ACharacter>(GetOwner());
     if (!Character) return;
 
@@ -72,6 +80,12 @@ void URaGWeaponComponent::EquipWeapon(int32 WeaponIndex)
         AttachWeaponToSocket(CurrentWeapon, Character->GetMesh(), WeaponArmorySocketName);
     }
     CurrentWeapon = Weapons[WeaponIndex];
+    // CurrentReloadAnimMontage = WeaponData[WeaponIndex].ReloadAnimMontage;
+    const auto CurrentWeaponData = WeaponData.FindByPredicate([&](const FWeaponData& Data) {  //
+        return Data.WeaponClass == CurrentWeapon->GetClass();
+    });  //
+    CurrentReloadAnimMontage = CurrentWeaponData ? CurrentWeaponData->ReloadAnimMontage : nullptr;
+
     AttachWeaponToSocket(CurrentWeapon, Character->GetMesh(), WeaponEquipSocketName);
     EquipAnimInProgress = true;
     PlayAnimMontage(EquipAnimMontage);
@@ -94,6 +108,7 @@ void URaGWeaponComponent::NextWeapon()
     CurrentWeaponIndex = (CurrentWeaponIndex + 1) % Weapons.Num();
     EquipWeapon(CurrentWeaponIndex);
 }
+
 void URaGWeaponComponent::PlayAnimMontage(UAnimMontage* Animation)
 {
     ACharacter* Character = Cast<ACharacter>(GetOwner());
@@ -104,16 +119,28 @@ void URaGWeaponComponent::PlayAnimMontage(UAnimMontage* Animation)
 
 void URaGWeaponComponent::InitAnimation()
 {
-    if (!EquipAnimMontage) return;
-    const auto NotifyEvents = EquipAnimMontage->Notifies;
-    for (auto NotifyEvent : NotifyEvents)
+
+    auto EquipFinishedNotify = AnimUtils::FindNotifyByClass<URaGEquipFinishedAnimNotify>(EquipAnimMontage);
+    if (EquipFinishedNotify)
     {
-        auto EquipFinishedNotify = Cast<URaGEquipFinishedAnimNotify>(NotifyEvent.Notify);
-        if (EquipFinishedNotify)
+        EquipFinishedNotify->OnNotified.AddUObject(this, &URaGWeaponComponent::OnEquipFinished);
+    }
+    else
+    {
+        UE_LOG(LogWeaponComponent, Error, TEXT("Equip notify is not founded"));
+        //checkNoEntry();
+    }
+
+    for (auto OneWeaponData : WeaponData)
+    {
+        auto ReloadFinishedNotify = AnimUtils::FindNotifyByClass<URaGReloadFinishedAnimNotify>(OneWeaponData.ReloadAnimMontage);
+        if (!ReloadFinishedNotify) continue;
         {
-            EquipFinishedNotify->OnNotified.AddUObject(this, &URaGWeaponComponent::OnEquipFinished);
-            break;
+            UE_LOG(LogWeaponComponent, Error, TEXT("Reload notify is not founded"));
+            //checkNoEntry();
         }
+
+        ReloadFinishedNotify->OnNotified.AddUObject(this, &URaGWeaponComponent::OnReloadFinished);
     }
 }
 
@@ -123,16 +150,49 @@ void URaGWeaponComponent::OnEquipFinished(USkeletalMeshComponent* MeshComponent)
     if (!Character || Character->GetMesh() != MeshComponent) return;
 
     EquipAnimInProgress = false;
-    //UE_LOG(LogWeaponComponent, Display, TEXT("Finished"));
+    // UE_LOG(LogWeaponComponent, Display, TEXT("Finished"));
 }
+void URaGWeaponComponent::OnReloadFinished(USkeletalMeshComponent* MeshComponent)
+{
+    ACharacter* Character = Cast<ACharacter>(GetOwner());
+    if (!Character || Character->GetMesh() != MeshComponent) return;
 
+    ReloadAnimInProgress = false;
+    // UE_LOG(LogWeaponComponent, Display, TEXT("Finished"));
+}
 bool URaGWeaponComponent::CanFire() const
 {
-    return CurrentWeapon && !EquipAnimInProgress;
-    
+    return CurrentWeapon && !EquipAnimInProgress && !ReloadAnimInProgress;
 }
 
 bool URaGWeaponComponent::CanEquip() const
 {
-    return !EquipAnimInProgress;
+    return !EquipAnimInProgress && !ReloadAnimInProgress;
+}
+
+bool URaGWeaponComponent::CanReload() const
+{
+    return CurrentWeapon                   //
+           && !EquipAnimInProgress         //
+           && !ReloadAnimInProgress        //
+           && CurrentWeapon->CanReload();  //
+}
+
+void URaGWeaponComponent::OnEmptyClip()
+{
+    ChangeClip();
+}
+
+void URaGWeaponComponent::ChangeClip()
+{
+    if (!CanReload()) return;
+    CurrentWeapon->StopFire();
+    CurrentWeapon->ChangeClip();
+    ReloadAnimInProgress = true;
+    PlayAnimMontage(CurrentReloadAnimMontage);
+}
+
+void URaGWeaponComponent::Reload()
+{
+    ChangeClip();
 }

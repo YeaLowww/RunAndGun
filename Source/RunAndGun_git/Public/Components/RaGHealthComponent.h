@@ -4,10 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "RaGCoreTypes.h"
 #include "RaGHealthComponent.generated.h"
 
-DECLARE_MULTICAST_DELEGATE(FOnDeathSignature)
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnHealthChangedSignature, float)
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class RUNANDGUN_GIT_API URaGHealthComponent : public UActorComponent

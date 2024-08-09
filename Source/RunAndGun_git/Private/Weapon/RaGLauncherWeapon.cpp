@@ -1,26 +1,34 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "Weapon/RaGLauncherWeapon.h"
 #include "Weapon/RaGProjectile.h"
 
-void ARaGLauncherWeapon::StartFire() {
+void ARaGLauncherWeapon::StartFire()
+{
     MakeShot();
 }
 
-void ARaGLauncherWeapon::MakeShot() {
+void ARaGLauncherWeapon::MakeShot()
+{
 
-    if (!GetWorld()) return;
+    if (!GetWorld() || IsAmmoEmpty())
+    {
+        StopFire();
+        return;
+    }
 
     FVector TraceStart, TraceEnd;
-    if (!GetTraceData(TraceStart, TraceEnd)) return;
+    if (!GetTraceData(TraceStart, TraceEnd))
+    {
+        StopFire();
+        return;
+    }
 
     FHitResult HitResult;
     MakeHit(HitResult, TraceStart, TraceEnd);
 
     const FVector EndPoint = HitResult.bBlockingHit ? HitResult.ImpactPoint : TraceEnd;
     const FVector Direction = (EndPoint - GetMuzzleWorldLocation()).GetSafeNormal();
-
 
     const FTransform SpawnTransform(FRotator::ZeroRotator, GetMuzzleWorldLocation());
     ARaGProjectile* Projectile = GetWorld()->SpawnActorDeferred<ARaGProjectile>(ProjectileClass, SpawnTransform);
@@ -31,5 +39,5 @@ void ARaGLauncherWeapon::MakeShot() {
         Projectile->SetOwner(GetOwner());
         Projectile->FinishSpawning(SpawnTransform);
     }
-
+    DercreaseAmmo();
 }
