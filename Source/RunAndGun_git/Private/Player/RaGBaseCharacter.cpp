@@ -75,6 +75,7 @@ void ARaGBaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
     PlayerInputComponent->BindAction("Run", IE_Released, this, &ARaGBaseCharacter::OnStopRunning);
     PlayerInputComponent->BindAction("Fire", IE_Pressed, WeaponComponent, &URaGWeaponComponent::StartFire);
     PlayerInputComponent->BindAction("Fire", IE_Released, WeaponComponent, &URaGWeaponComponent::StopFire);
+    PlayerInputComponent->BindAction("NextWeapon", IE_Pressed, WeaponComponent, &URaGWeaponComponent::NextWeapon);
 }
 
 
@@ -130,6 +131,8 @@ void ARaGBaseCharacter::OnDeath() {
         Controller->ChangeState(NAME_Spectating);
     }
     GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+
+    WeaponComponent->StopFire();
 }
 
 void ARaGBaseCharacter::OnHealthChanged(float Health) {
