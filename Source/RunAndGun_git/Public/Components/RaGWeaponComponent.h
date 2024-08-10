@@ -4,6 +4,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "RaGCoreTypes.h"
+#include "Weapon/RaGBaseWeapon.h"
 #include "RaGWeaponComponent.generated.h"
 
 class ARaGBaseWeapon;
@@ -19,6 +20,9 @@ public:
     void StopFire();
     void NextWeapon();
     void Reload();
+
+    bool GetCurrentWeaponUIData(FWeaponUIData& UIData) const;
+    bool GetCurrentWeaponAmmoData(FAmmoData& AmmoData) const;
 
 protected:
     UPROPERTY(EditDefaultsOnly, Category = "Weapon")

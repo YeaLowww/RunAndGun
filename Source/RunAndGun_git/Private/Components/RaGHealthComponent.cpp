@@ -20,6 +20,7 @@ void URaGHealthComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
+    check(MaxHealth > 0);
     SetHealth(MaxHealth);
 
 

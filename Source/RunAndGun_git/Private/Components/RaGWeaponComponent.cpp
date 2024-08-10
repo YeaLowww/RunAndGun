@@ -196,3 +196,23 @@ void URaGWeaponComponent::Reload()
 {
     ChangeClip();
 }
+
+bool URaGWeaponComponent::GetCurrentWeaponUIData(FWeaponUIData& UIData) const
+{
+    if (CurrentWeapon)
+    {
+        UIData = CurrentWeapon->GetUIData();
+        return true;
+    }
+    return false;
+}
+
+bool URaGWeaponComponent::GetCurrentWeaponAmmoData(FAmmoData& AmmoData) const
+{
+    if (CurrentWeapon)
+    {
+        AmmoData = CurrentWeapon->GetAmmoData();
+        return true;
+    }
+    return false;
+}
