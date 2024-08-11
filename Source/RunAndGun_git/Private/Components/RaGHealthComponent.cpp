@@ -16,6 +16,18 @@ URaGHealthComponent::URaGHealthComponent()
 
 }
 
+bool URaGHealthComponent::TryToGetHealth(float HealthAmount)
+{
+    if (IsDead() || IsHealthFull()) return false;
+    SetHealth(Health + HealthAmount);
+    return true;
+}
+
+bool URaGHealthComponent::IsHealthFull() const
+{
+    return FMath::IsNearlyEqual(Health, MaxHealth);
+}
+
 void URaGHealthComponent::BeginPlay()
 {
 	Super::BeginPlay();
@@ -55,7 +67,7 @@ void URaGHealthComponent::HealUpdate() {
 
     SetHealth(Health + HealModifier);
 
-    if (FMath::IsNearlyEqual(Health, MaxHealth) && GetWorld())
+    if (IsHealthFull() && GetWorld())
     {
         GetWorld()->GetTimerManager().ClearTimer(HealTimerHandle);
     }

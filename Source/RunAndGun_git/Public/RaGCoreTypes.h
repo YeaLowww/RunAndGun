@@ -1,9 +1,11 @@
 #pragma once
 #include "RaGCoreTypes.generated.h"
 //weapon
-DECLARE_MULTICAST_DELEGATE(FOnClipEmptySignature);
 
 class ARaGBaseWeapon;
+
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnClipEmptySignature, ARaGBaseWeapon*);
+
 USTRUCT(BlueprintType)
 struct FAmmoData
 {

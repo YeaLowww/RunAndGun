@@ -52,7 +52,7 @@ void URaGWeaponComponent::SpawnWeapons()
         auto Weapon = GetWorld()->SpawnActor<ARaGBaseWeapon>(OneWeaponData.WeaponClass);
         if (!Weapon) continue;
 
-        Weapon->OnClipEmpty.AddUObject(this, &URaGWeaponComponent::OnEmptyClip);
+        Weapon->OnClipEmpty.AddUObject(this, &URaGWeaponComponent::OnClipEmpty);
         Weapon->SetOwner(Character);
         Weapons.Add(Weapon);
 
@@ -178,9 +178,23 @@ bool URaGWeaponComponent::CanReload() const
            && CurrentWeapon->CanReload();  //
 }
 
-void URaGWeaponComponent::OnEmptyClip()
+void URaGWeaponComponent::OnClipEmpty(ARaGBaseWeapon* AmmoEmptyWeapon)
 {
-    ChangeClip();
+    if (!AmmoEmptyWeapon) return;
+    if (CurrentWeapon == AmmoEmptyWeapon)
+    {
+        ChangeClip();
+    }
+    else
+    {
+        for (const auto Weapon : Weapons)
+        {
+            if (Weapon == AmmoEmptyWeapon)
+            {
+                Weapon->ChangeClip();
+            }
+        }
+    }
 }
 
 void URaGWeaponComponent::ChangeClip()
@@ -213,6 +227,18 @@ bool URaGWeaponComponent::GetCurrentWeaponAmmoData(FAmmoData& AmmoData) const
     {
         AmmoData = CurrentWeapon->GetAmmoData();
         return true;
+    }
+    return false;
+}
+
+bool URaGWeaponComponent::TryToGetAmmo(TSubclassOf<ARaGBaseWeapon> WeaponType, int32 ClipsAmount)
+{
+    for (const auto Weapon : Weapons)
+    {
+        if (Weapon && Weapon->IsA(WeaponType))
+        {
+            return Weapon->TryToGetAmmo(ClipsAmount);
+        }
     }
     return false;
 }
