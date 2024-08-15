@@ -7,7 +7,7 @@
 
 class USphereComponent;
 class UProjectileMovementComponent;
-
+class URaGWeaponFXComponent;
 
 UCLASS()
 class RUNANDGUN_GIT_API ARaGProjectile : public AActor
@@ -19,6 +19,8 @@ public:
     void SetShotDirection(const FVector& Direction) { ShotDirection = Direction; }
 
 protected:
+    UPROPERTY(VisibleAnywhere, Category = "VFX")
+    URaGWeaponFXComponent* WeaponFXComponent;
 
 	UPROPERTY(VisibleAnywhere, Category = "Weapon")
     USphereComponent* CollisionComponent;

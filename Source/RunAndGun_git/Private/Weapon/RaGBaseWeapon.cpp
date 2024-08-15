@@ -75,6 +75,7 @@ void ARaGBaseWeapon::MakeHit(FHitResult& HitResult, const FVector& TraceStart, c
     FCollisionQueryParams CollisionParams;
     CollisionParams.bReturnPhysicalMaterial = true;
     CollisionParams.AddIgnoredActor(GetOwner());
+    CollisionParams.bReturnPhysicalMaterial = true;
 
     GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECollisionChannel::ECC_Visibility, CollisionParams);
 }
