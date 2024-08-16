@@ -40,4 +40,6 @@ void ARaGLauncherWeapon::MakeShot()
         Projectile->FinishSpawning(SpawnTransform);
     }
     DercreaseAmmo();
+
+    SpawnMuzzleFX();
 }

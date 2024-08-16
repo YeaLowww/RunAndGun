@@ -3,6 +3,9 @@
 
 #include "Components/RaGHealthComponent.h"
 #include "GameFramework/Actor.h"
+#include "GameFramework/Pawn.h"
+#include "GameFramework/Controller.h"
+#include "Camera/CameraShakeBase.h"
 #include "Engine/World.h"
 #include "TimerManager.h"
 
@@ -60,7 +63,7 @@ void URaGHealthComponent::OnTakeAnyDamage(
         GetWorld()->GetTimerManager().SetTimer(HealTimerHandle, this, &URaGHealthComponent::HealUpdate, HealUpdateTime, true, HealDelay);
         
     }
-
+    PlayCameraShake();
 }
 
 void URaGHealthComponent::HealUpdate() {
@@ -75,6 +78,19 @@ void URaGHealthComponent::HealUpdate() {
 
 void URaGHealthComponent::SetHealth(float NewHealth) {
 
-    Health = FMath::Clamp(NewHealth, 0.0f, MaxHealth);
-    OnHealthChanged.Broadcast(Health);
+    const auto NextHealth = FMath::Clamp(NewHealth, 0.0f, MaxHealth);
+    const auto HealthDelta = NextHealth - Health;
+    Health = NextHealth;
+    OnHealthChanged.Broadcast(Health, HealthDelta);
+}
+
+void URaGHealthComponent::PlayCameraShake() {
+    if (IsDead()) return;
+    const auto Player = Cast<APawn>(GetOwner());
+    if (!Player) return;
+
+    const auto Controller = Player->GetController<APlayerController>();
+    if (!Controller || !Controller->PlayerCameraManager) return;
+
+    Controller->PlayerCameraManager->StartCameraShake(CameraShake);
 }

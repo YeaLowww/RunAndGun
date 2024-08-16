@@ -7,8 +7,9 @@
 #include "RaGCoreTypes.h"
 #include "RaGHealthComponent.generated.h"
 
+class UCameraShakeBase;
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class RUNANDGUN_GIT_API URaGHealthComponent : public UActorComponent
 {
 	GENERATED_BODY()
@@ -33,7 +34,7 @@ public:
 protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Health", meta = (ClampMin = "0.0", ClampMax = "1000.0"))
 	float MaxHealth = 100.0f;
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Heal", meta = (EditCondition = "AutoHeal"))
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Heal")
     bool AutoHeal = true;
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Heal", meta = (EditCondition = "AutoHeal"))
     float HealUpdateTime = 1.0f;
@@ -41,6 +42,9 @@ protected:
     float HealDelay = 3.0f;
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Heal", meta = (EditCondition = "AutoHeal"))
     float HealModifier = 5.0f;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "VFX")
+    TSubclassOf<UCameraShakeBase> CameraShake;
 
 	virtual void BeginPlay() override;
 
@@ -56,4 +60,5 @@ private:
 
     void SetHealth(float NewHealth);
 
+    void PlayCameraShake();
 };

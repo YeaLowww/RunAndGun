@@ -5,6 +5,8 @@
 #include "DrawDebugHelpers.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/Controller.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogBaseWeapon, All, All)
 
@@ -136,7 +138,6 @@ bool ARaGBaseWeapon::CanReload() const
     return CurrentAmmo.Bullets < DefaultAmmo.Bullets && CurrentAmmo.Clips > 0;
 }
 
-
 void ARaGBaseWeapon::LogAmmo()
 {
     FString AmmoInfo = "Ammo: " + FString::FromInt(CurrentAmmo.Bullets) + " / ";
@@ -153,7 +154,6 @@ bool ARaGBaseWeapon::TryToGetAmmo(int32 ClipsAmount)
         UE_LOG(LogBaseWeapon, Display, TEXT("Ammo was empty"));
         CurrentAmmo.Clips = FMath::Clamp(ClipsAmount, 0, DefaultAmmo.Clips + 1);
         OnClipEmpty.Broadcast(this);
-
     }
     else if (CurrentAmmo.Clips < DefaultAmmo.Clips)
     {
@@ -176,4 +176,15 @@ bool ARaGBaseWeapon::TryToGetAmmo(int32 ClipsAmount)
         UE_LOG(LogBaseWeapon, Display, TEXT("Bullets were added"));
     }
     return true;
+}
+
+UNiagaraComponent* ARaGBaseWeapon::SpawnMuzzleFX()
+{
+    return UNiagaraFunctionLibrary::SpawnSystemAttached(MuzzleFX,  //
+        WeaponMesh,                                           //
+        MuzzleSocketName,                                     //
+        FVector::ZeroVector,                                  //
+        FRotator::ZeroRotator,                                //
+        EAttachLocation::SnapToTarget,                        //
+        true);                                                //
 }

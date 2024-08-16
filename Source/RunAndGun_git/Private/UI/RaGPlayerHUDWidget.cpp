@@ -30,7 +30,6 @@ bool URaGPlayerHUDWidget::GetCurrentWeaponAmmoData(FAmmoData& AmmoData) const
     return WeaponComponent->GetCurrentWeaponAmmoData(AmmoData);
 }
 
-
 bool URaGPlayerHUDWidget::IsPlayerAlive() const
 {
     const auto HealthComponent = RaGUtils::GetRaGPlayerComponent<URaGHealthComponent>(GetOwningPlayerPawn());
@@ -40,4 +39,22 @@ bool URaGPlayerHUDWidget::IsPlayerSpectating() const
 {
     const auto Controller = GetOwningPlayer();
     return Controller && Controller->GetStateName() == NAME_Spectating;
+}
+
+bool URaGPlayerHUDWidget::Initialize()
+{
+    const auto HealthComponent = RaGUtils::GetRaGPlayerComponent<URaGHealthComponent>(GetOwningPlayerPawn());
+    if (HealthComponent)
+    {
+        HealthComponent->OnHealthChanged.AddUObject(this, &URaGPlayerHUDWidget::OnHealthChanged);
+    }
+    return Super::Initialize();
+}
+
+void URaGPlayerHUDWidget::OnHealthChanged(float Health, float HealthDelta)
+{
+    if (HealthDelta < 0.0f)
+    {
+        OnTakeDamage();
+    }
 }
