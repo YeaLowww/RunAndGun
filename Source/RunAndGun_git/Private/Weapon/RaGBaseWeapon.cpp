@@ -42,11 +42,21 @@ APlayerController* ARaGBaseWeapon::GetPlayerController() const
 
 bool ARaGBaseWeapon::GetPlayerViewPoint(FVector& ViewLocation, FRotator& ViewRotation) const
 {
+    const auto RaGCharacter = Cast<ACharacter>(GetOwner());
+    if (!RaGCharacter) return false;
+    if (RaGCharacter->IsPlayerControlled())
+    {
+        const auto Controller = GetPlayerController();
+        if (!Controller) return false;
 
-    const auto Controller = GetPlayerController();
-    if (!Controller) return false;
-
-    Controller->GetPlayerViewPoint(ViewLocation, ViewRotation);
+        Controller->GetPlayerViewPoint(ViewLocation, ViewRotation);
+    }
+    else
+    {
+        ViewLocation = GetMuzzleWorldLocation();
+        ViewRotation = WeaponMesh->GetSocketRotation(MuzzleSocketName);
+    }
+    
     return true;
 }
 

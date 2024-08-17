@@ -8,7 +8,16 @@ public class RunAndGun_git : ModuleRules
     {
         PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
-        PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "UMG", "Niagara","PhysicsCore" });
+        PublicDependencyModuleNames.AddRange(new string[] { "Core",
+            "CoreUObject",
+            "Engine", 
+            "InputCore",
+            "UMG",
+            "Niagara",
+            "PhysicsCore",
+            "GameplayTasks",
+            "NavigationSystem" 
+        });
 
         PrivateDependencyModuleNames.AddRange(new string[] { });
 
@@ -19,8 +28,10 @@ public class RunAndGun_git : ModuleRules
             "RunAndGun_git/Public/UI",
             "RunAndGun_git/Public/Animation",
             "RunAndGun_git/Public/Pickups",
-            "RunAndGun_git/Public/Weapon/Components"
-
+            "RunAndGun_git/Public/Weapon/Components",
+            "RunAndGun_git/Public/AI",
+            "RunAndGun_git/Public/AI/Tasks",
+            "RunAndGun_git/Public/AI/Services"
         });
         // Uncomment if you are using Slate UI
         // PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });

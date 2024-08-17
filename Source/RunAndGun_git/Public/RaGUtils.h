@@ -4,7 +4,7 @@ class RaGUtils
 {
 public:
 	template<typename T>
-    static T* GetRaGPlayerComponent(APawn* PlayerPawn)
+    static T* GetRaGPlayerComponent(AActor* PlayerPawn)
     {
         if (!PlayerPawn) return nullptr;
 

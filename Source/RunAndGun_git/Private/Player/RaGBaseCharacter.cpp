@@ -89,7 +89,6 @@ void ARaGBaseCharacter::MoveForward(float Amount) {
 
     
 }
-
 void ARaGBaseCharacter::MoveRight(float Amount) {
     if (Amount == 0.0f) return;
 	AddMovementInput(GetActorRightVector(), Amount);
