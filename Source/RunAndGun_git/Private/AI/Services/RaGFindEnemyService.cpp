@@ -13,7 +13,7 @@ URaGFindEnemyService::URaGFindEnemyService() {
 }
 
 void URaGFindEnemyService::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) {
-
+    UE_LOG(LogTemp, Display, TEXT("Enemy found"));
 	const auto Blackboard = OwnerComp.GetBlackboardComponent();
     if (Blackboard)
     {

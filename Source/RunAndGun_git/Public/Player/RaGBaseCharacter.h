@@ -52,6 +52,7 @@ protected:
 
 
 	virtual void BeginPlay() override;
+    virtual void OnDeath();
 
 public:	
 
@@ -72,7 +73,6 @@ private:
 	void MoveRight(float Amount);
     void OnStartRunning();
     void OnStopRunning();
-    void OnDeath();
     void OnHealthChanged(float Health, float HealthDelta);
 
     UFUNCTION()
