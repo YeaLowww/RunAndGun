@@ -31,6 +31,11 @@ void ARaGBasePickup::Tick(float DeltaTime)
     AddActorLocalRotation(FRotator(0.0f, RotationYaw, 0.0f));
 }
 
+bool ARaGBasePickup::CouldBeTaken() const
+{
+    return !GetWorldTimerManager().IsTimerActive(RespawnTimerHandle);
+}
+
 void ARaGBasePickup::NotifyActorBeginOverlap(AActor* OtherActor)
 {
     Super::NotifyActorBeginOverlap(OtherActor);
@@ -57,7 +62,6 @@ void ARaGBasePickup::PickupWasTaken()
         GetRootComponent()->SetVisibility(false, true);
     }
 
-    FTimerHandle RespawnTimerHandle;
     GetWorldTimerManager().SetTimer(RespawnTimerHandle, this, &ARaGBasePickup::Respawn, RespawnTime);
 }
 

@@ -23,13 +23,15 @@ public:
     virtual void StopFire();
 
     void ChangeClip();
-    bool CanReload() const; 
+    bool CanReload() const;
 
     FWeaponUIData GetUIData() const { return UIData; }
     FAmmoData GetAmmoData() const { return CurrentAmmo; }
 
     bool TryToGetAmmo(int32 ClipsAmount);
     bool IsAmmoEmpty() const;
+
+    bool IsAmmoFull() const;
 
 protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
@@ -50,7 +52,6 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "VFX")
     UNiagaraSystem* MuzzleFX;
 
-
     virtual void BeginPlay() override;
 
     virtual void MakeShot();
@@ -63,10 +64,8 @@ protected:
     void MakeHit(FHitResult& HitResult, const FVector& TraceStart, const FVector& TraceEnd);
 
     void DercreaseAmmo();
-    
-    bool IsClipEmpty() const;
 
-    bool IsAmmoFull() const;
+    bool IsClipEmpty() const;
 
     void LogAmmo();
 

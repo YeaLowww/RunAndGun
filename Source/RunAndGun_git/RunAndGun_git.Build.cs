@@ -31,7 +31,12 @@ public class RunAndGun_git : ModuleRules
             "RunAndGun_git/Public/Weapon/Components",
             "RunAndGun_git/Public/AI",
             "RunAndGun_git/Public/AI/Tasks",
-            "RunAndGun_git/Public/AI/Services"
+            "RunAndGun_git/Public/AI/Services",
+            "RunAndGun_git/Public/AI/EQS",
+            "RunAndGun_git/Public/AI/Decorators"
+
+
+
         });
         // Uncomment if you are using Slate UI
         // PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
